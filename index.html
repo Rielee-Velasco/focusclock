@@ -11,8 +11,10 @@
       font-family: ui-monospace, monospace; user-select: none;
     }
     #clock {
-      font-size: 90vmin; /* fills most of the screen */
-      font-weight: 800; letter-spacing: .05em; text-align: center;
+      font-weight: 800;
+      letter-spacing: .05em;
+      text-align: center;
+      font-size: clamp(8rem, 20vw, 30rem); /* back to OG */
       line-height: 1;
     }
     #sub, #hint, #toast {
@@ -23,107 +25,4 @@
     #hint { bottom: 2.6rem; opacity: .45; font-size: .95rem; }
     #toast {
       top: 1rem; margin: 0 1rem; padding: .45rem .6rem;
-      background: rgba(255,165,0,.14); border: 1px solid rgba(255,165,0,.4);
-      color: orange; border-radius: .5rem; font-size: .9rem; display: none;
-    }
-  </style>
-</head>
-<body>
-  <div id="clock">00:00</div>
-  <div id="hint">Tap/click once to go fullscreen, keep awake, and play focus sound • M = mute/unmute</div>
-  <div id="sub">GMT+8 • 24-hour • Focus sound</div>
-  <div id="toast"></div>
-
-  <!-- Drop your downloaded audio file in the same folder -->
-  <audio id="bg" src="focus.mp3" loop preload="auto"></audio>
-
-  <script>
-    // Clock setup (GMT+8)
-    const fmt = new Intl.DateTimeFormat('en-GB', { hour:'2-digit', minute:'2-digit', hour12:false, timeZone:'Asia/Manila' });
-    const clock = document.getElementById('clock');
-    function tick(){ clock.textContent = fmt.format(new Date()); }
-    tick(); setInterval(tick, 1000);
-
-    const hint = document.getElementById('hint'), toast = document.getElementById('toast');
-    function showToast(msg, ms=1600) {
-      toast.textContent = msg; toast.style.display = 'block';
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(() => toast.style.display = 'none', ms);
-    }
-
-    // Wake Lock + Fullscreen
-    let wakeLock = null;
-    async function requestWakeLock() {
-      try {
-        if (!('wakeLock' in navigator)) throw new Error('Wake Lock not supported');
-        wakeLock = await navigator.wakeLock.request('screen');
-        wakeLock.addEventListener('release', () => { wakeLock = null; });
-      } catch (e) {
-        showToast('Wake lock: ' + e.message);
-      }
-    }
-    async function goFullscreen() {
-      try {
-        if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
-      } catch (e) {
-        showToast('Fullscreen: ' + e.message);
-      }
-    }
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && !wakeLock) requestWakeLock();
-    });
-
-    // Audio control
-    const audio = document.getElementById('bg');
-    let soundOn = true, volume = 0.5;
-    audio.volume = volume;
-
-    async function startAudio() {
-      try {
-        await audio.play();
-        showToast('Focus sound playing');
-      } catch (e) {
-        showToast('Audio blocked: ' + e.message);
-      }
-    }
-
-    function updateVolume() {
-      audio.volume = soundOn ? volume : 0;
-    }
-
-    // Activation
-    async function activate() {
-      hint.style.display = 'none';
-      await goFullscreen();
-      await requestWakeLock();
-      await startAudio();
-      window.removeEventListener('pointerdown', activate);
-      window.removeEventListener('keydown', activate);
-    }
-    window.addEventListener('pointerdown', activate, { once: true });
-    window.addEventListener('keydown', activate, { once: true });
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', e => {
-      const k = e.key.toLowerCase();
-      if (k === 'm') {
-        soundOn = !soundOn;
-        updateVolume();
-        showToast(soundOn ? 'Unmuted' : 'Muted');
-      }
-      if (k === 'arrowup') {
-        volume = Math.min(1, volume + 0.05);
-        updateVolume();
-        showToast('Vol: ' + Math.round(volume * 100) + '%');
-      }
-      if (k === 'arrowdown') {
-        volume = Math.max(0, volume - 0.05);
-        updateVolume();
-        showToast('Vol: ' + Math.round(volume * 100) + '%');
-      }
-      if (k === 'f') goFullscreen();
-      if (k === 'w') requestWakeLock();
-    });
-  </script>
-</body>
-</html>
+      backgro
