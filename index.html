@@ -14,7 +14,7 @@
       font-weight: 800;
       letter-spacing: .05em;
       text-align: center;
-      font-size: clamp(8rem, 20vw, 30rem); /* back to OG */
+      font-size: clamp(8rem, 20vw, 30rem); /* original size */
       line-height: 1;
     }
     #sub, #hint, #toast {
@@ -36,10 +36,11 @@
   <div id="sub">GMT+8 • 24-hour • Focus sound</div>
   <div id="toast"></div>
 
+  <!-- Put your downloaded focus audio here (e.g. relaxing-smoothed-brown-noise.mp3) -->
   <audio id="bg" src="focus.mp3" loop preload="auto"></audio>
 
   <script>
-    // ---------- Clock (GMT+8) ----------
+    // Clock (GMT+8)
     const fmt = new Intl.DateTimeFormat('en-GB', { hour:'2-digit', minute:'2-digit', hour12:false, timeZone:'Asia/Manila' });
     const clock = document.getElementById('clock');
     function tick(){ clock.textContent = fmt.format(new Date()); }
@@ -52,7 +53,7 @@
       showToast._t=setTimeout(()=>toast.style.display='none',ms);
     }
 
-    // ---------- Wake Lock + Fullscreen ----------
+    // Wake Lock + Fullscreen
     let wakeLock=null;
     async function requestWakeLock(){
       try{
@@ -67,7 +68,7 @@
     }
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!wakeLock)requestWakeLock();});
 
-    // ---------- Audio ----------
+    // Audio
     const audio=document.getElementById('bg');
     let soundOn=true, volume=0.5; audio.volume=volume;
     async function startAudio(){
@@ -76,19 +77,20 @@
     }
     function updateVolume(){ audio.volume = soundOn ? volume : 0; }
 
-    // ---------- Activation ----------
+    // Activation
     async function activate(){
       hint.style.display='none';
       await goFullscreen();
       await requestWakeLock();
-      await startAudio();
+      updateVolume();
+      startAudio();
       window.removeEventListener('pointerdown', activate);
       window.removeEventListener('keydown', activate);
     }
     window.addEventListener('pointerdown', activate, { once:true });
     window.addEventListener('keydown', activate, { once:true });
 
-    // ---------- Keyboard shortcuts ----------
+    // Keyboard shortcuts
     document.addEventListener('keydown', e=>{
       const k=e.key.toLowerCase();
       if(k==='m'){ soundOn=!soundOn; updateVolume(); showToast(soundOn?'Unmuted':'Muted'); }
